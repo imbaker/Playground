@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Playground.Middleware;
+using Playground.Tests.Extensions;
 using Shouldly;
 
 public class ResponseLocationDomainTransformMiddlewareTests
@@ -47,14 +48,8 @@ public class ResponseLocationDomainTransformMiddlewareTests
         {
             c.Request.Method = HttpMethods.Post;
             c.Response.StatusCode = statusCode;
-            foreach (var header in requestHeaders ?? new HeaderDictionary())
-            {
-                c.Request.Headers.Append(header.Key, header.Value);
-            }
-            foreach (var header in responseHeaders ?? new HeaderDictionary())
-            {
-                c.Response.Headers.Append(header.Key, header.Value);
-            }
+            c.Request.Headers.Append(requestHeaders ?? new HeaderDictionary());
+            c.Response.Headers.Append(responseHeaders ?? new HeaderDictionary());
         });
     }
 
