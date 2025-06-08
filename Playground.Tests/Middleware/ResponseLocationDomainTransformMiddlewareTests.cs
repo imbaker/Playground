@@ -48,8 +48,8 @@ public class ResponseLocationDomainTransformMiddlewareTests
         {
             c.Request.Method = HttpMethods.Post;
             c.Response.StatusCode = statusCode;
-            c.Request.Headers.Append(requestHeaders ?? new HeaderDictionary());
-            c.Response.Headers.Append(responseHeaders ?? new HeaderDictionary());
+            c.Request.Headers.Append(requestHeaders);
+            c.Response.Headers.Append(responseHeaders);
         });
     }
 
@@ -70,7 +70,7 @@ public class ResponseLocationDomainTransformMiddlewareTests
                         app.UseMiddleware<ResponseLocationDomainTransformMiddleware>();
                         app.UseEndpoints(e =>
                         {
-                            e.MapPost("/optional-path", () => TypedResults.Text("Response"));
+                            e.MapPost("/", () => TypedResults.Text("Response"));
                         });
                     });
             })

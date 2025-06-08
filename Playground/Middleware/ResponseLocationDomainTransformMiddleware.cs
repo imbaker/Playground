@@ -2,6 +2,7 @@
 
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using Serilog;
 
 public class ResponseLocationDomainTransformMiddleware
 {
@@ -23,22 +24,24 @@ public class ResponseLocationDomainTransformMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var ctx = (HttpContext) context;
-        var hasForwardedHostHeader = ctx.Request.Headers.ContainsKey(XForwardedHostKey);
-        var hasLocationHeader = ctx.Response.Headers.ContainsKey(LocationKey);
-        var responseStatusCode = ctx.Response.StatusCode;
+        Log.Logger.Debug("ResponseLocationDomainTransformMiddleware.InvokeAsync");
+        var hasForwardedHostHeader = context.Request.Headers.ContainsKey(XForwardedHostKey);
+        var hasLocationHeader = context.Response.Headers.ContainsKey(LocationKey);
+        var responseStatusCode = context.Response.StatusCode;
         if ((responseStatusCode == (int)HttpStatusCode.Created || responseStatusCode == (int)HttpStatusCode.Accepted)
             && hasForwardedHostHeader && hasLocationHeader)
         {
-            if (ctx.Response.Headers.TryGetValue(LocationKey, out var locationHeaderValue)
-                && ctx.Request.Headers.TryGetValue(XForwardedHostKey, out var forwardedHostHeaderValue))
+            if (context.Response.Headers.TryGetValue(LocationKey, out var locationHeaderValue)
+                && context.Request.Headers.TryGetValue(XForwardedHostKey, out var forwardedHostHeaderValue))
             {
-                var optionalPathExists = ctx.Request.Headers.TryGetValue(XafdRoutePatternToMatch, out var optionalPath);
+                var optionalPathExists = context.Request.Headers.TryGetValue(XafdRoutePatternToMatch, out var optionalPath);
                 var callingClientHostname = $"{forwardedHostHeaderValue.First()}{(optionalPathExists ? $"/{optionalPath}" : string.Empty)}";
-                var transformedLocationHeaderValue = locationHeaderValue.First().Replace(ctx.Request.Host.Value, callingClientHostname);
-                ctx.Response.Headers.Remove(LocationKey);
-                ctx.Response.Headers.Append(LocationKey, transformedLocationHeaderValue);
+                var transformedLocationHeaderValue = locationHeaderValue.First()?.Replace(context.Request.Host.Value, callingClientHostname);
+                context.Response.Headers.Remove(LocationKey);
+                context.Response.Headers.Append(LocationKey, transformedLocationHeaderValue);
             }
         }
+
+        await _next(context);
     }
 }
