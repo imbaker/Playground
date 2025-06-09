@@ -11,10 +11,10 @@ public class FakerRepositoryTests
     private readonly HttpTest _httpTest = new();
 
     [Fact]
-    public async Task GetUsersAsync_With_No_Parameters_Returns_Five_Users()
+    public async Task GetUsersAsync_With_No_Parameters_Returns_Ten_Users()
     {
         // Arrange
-        const int expectedDefaultQuantity = 5;
+        const int expectedDefaultQuantity = 10;
         _httpTest.RespondWithJson(GetUsersResponse(expectedDefaultQuantity));
 
         // Act
@@ -28,8 +28,28 @@ public class FakerRepositoryTests
     }
 
     [Theory]
-    [InlineData(10)]
+    [InlineData(-1, 10)]
+    [InlineData(0, 10)]
+    [InlineData(1001, 1000)]
+    public async Task GetUsersAsync_With_Invalid_Quantity_Returns_Correct_Values(int requestedQuantity, int expectedQuantityReturned)
+    {
+        // Arrange
+        _httpTest.RespondWithJson(GetUsersResponse(requestedQuantity));
+
+        // Act
+        var result = await CreateSubjectUnderTest().GetUsersAsync(requestedQuantity);
+
+        // Assert
+        result.Count.ShouldBe(expectedQuantityReturned);
+        _httpTest.ShouldHaveCalled(FakerApiUrl)
+            .WithQueryParam("_quantity", requestedQuantity)
+            .Times(1);
+    }
+
+    [Theory]
     [InlineData(1)]
+    [InlineData(10)]
+    [InlineData(1000)]
     public async Task GetUsersAsync_With_Parameters_Returns_That_Many_Users(int expectedQuantity)
     {
         // Arrange
@@ -47,8 +67,10 @@ public class FakerRepositoryTests
 
     private static FakerRepository CreateSubjectUnderTest() => new();
 
-    private static List<User> GetUsers(int quantity) =>
-        Enumerable.Range(0, quantity)
+    private static List<User> GetUsers(int quantity = 10)
+    {
+        quantity = (quantity < 1) ? 10 : quantity;
+        return Enumerable.Range(1, Math.Min(quantity, 1000))
             .Select(i => new User
             {
                 Id = i,
@@ -62,6 +84,7 @@ public class FakerRepositoryTests
                 Image = $"Image{i}",
             })
             .ToList();
+    }
 
     private static Response<User> GetUsersResponse(int userQuantity) =>
         new() { Status = "OK", Locale = "en_GB", Seed = null!, Data = GetUsers(userQuantity) };

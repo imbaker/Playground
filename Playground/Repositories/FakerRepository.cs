@@ -7,7 +7,7 @@ public class FakerRepository
 {
     private const string DefaultDomainName = "https://fakerapi.it";
     private const string DefaultLocale = "en-GB";
-    private const int DefaultQuantity = 5;
+    private const int DefaultQuantity = 10;
     private readonly string _domainName;
 
     public FakerRepository(string domainName = DefaultDomainName) => _domainName = domainName;
