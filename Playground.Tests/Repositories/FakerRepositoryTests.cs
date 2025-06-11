@@ -6,16 +6,26 @@ using Shouldly;
 
 public class FakerRepositoryTests
 {
+    #region Constants
+
     private const string FakerApiUrl = "https://fakerapi.it/api/v2/users";
 
+    #endregion
+
+    #region Private fields
+
     private readonly HttpTest _httpTest = new();
+
+    #endregion
+
+    #region GetUsersAsync Tests
 
     [Fact]
     public async Task GetUsersAsync_With_No_Parameters_Returns_Ten_Users()
     {
         // Arrange
         const int expectedDefaultQuantity = 10;
-        _httpTest.RespondWithJson(GetUsersResponse(expectedDefaultQuantity));
+        _httpTest.RespondWithJson(GetMockUsersResponse(expectedDefaultQuantity));
 
         // Act
         var result = await CreateSubjectUnderTest().GetUsersAsync();
@@ -34,7 +44,7 @@ public class FakerRepositoryTests
     public async Task GetUsersAsync_With_Invalid_Quantity_Returns_Correct_Values(int requestedQuantity, int expectedQuantityReturned)
     {
         // Arrange
-        _httpTest.RespondWithJson(GetUsersResponse(requestedQuantity));
+        _httpTest.RespondWithJson(GetMockUsersResponse(requestedQuantity));
 
         // Act
         var result = await CreateSubjectUnderTest().GetUsersAsync(requestedQuantity);
@@ -53,7 +63,7 @@ public class FakerRepositoryTests
     public async Task GetUsersAsync_With_Parameters_Returns_That_Many_Users(int expectedQuantity)
     {
         // Arrange
-        _httpTest.RespondWithJson(GetUsersResponse(expectedQuantity));
+        _httpTest.RespondWithJson(GetMockUsersResponse(expectedQuantity));
 
         // Act
         var result = await CreateSubjectUnderTest().GetUsersAsync(expectedQuantity);
@@ -65,9 +75,13 @@ public class FakerRepositoryTests
             .Times(1);
     }
 
+    #endregion
+
+    #region Private methods
+
     private static FakerRepository CreateSubjectUnderTest() => new();
 
-    private static List<User> GetUsers(int quantity = 10)
+    private static List<User> GetMockUsers(int quantity = 10)
     {
         quantity = (quantity < 1) ? 10 : quantity;
         return Enumerable.Range(1, Math.Min(quantity, 1000))
@@ -86,6 +100,8 @@ public class FakerRepositoryTests
             .ToList();
     }
 
-    private static Response<User> GetUsersResponse(int userQuantity) =>
-        new() { Status = "OK", Locale = "en_GB", Seed = null!, Data = GetUsers(userQuantity) };
+    private static Response<User> GetMockUsersResponse(int userQuantity) =>
+        new() { Status = "OK", Locale = "en_GB", Seed = null!, Data = GetMockUsers(userQuantity) };
+
+    #endregion
 }
