@@ -7,5 +7,5 @@ public record Response<T>
     public required string Locale { get; set; }
     public required string Seed { get; set; }
     public int Total { get; set; }
-    public required List<T> Data { get; set; }
+    public required List<T> Data { get; init; }
 }

@@ -2,7 +2,7 @@
 
 public record User
 {
-    public required int Id { get; set; }
+    public required int Id { get; init; }
     public string? Uuid { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }

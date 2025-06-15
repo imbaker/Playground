@@ -21,17 +21,17 @@ public class FakerRepositoryTests
     #region GetUsersAsync Tests
 
     [Fact]
-    public async Task GetUsersAsync_With_No_Parameters_Returns_Ten_Users()
+    public async Task GetUsersAsync_When_No_Parameters_Are_Provided_Returns_Ten_Users()
     {
         // Arrange
         const int expectedDefaultQuantity = 10;
         _httpTest.RespondWithJson(GetMockUsersResponse(expectedDefaultQuantity));
 
         // Act
-        var result = await CreateSubjectUnderTest().GetUsersAsync();
+        var actualListOfUser = await CreateSubjectUnderTest().GetUsersAsync();
 
         // Assert
-        result.Count.ShouldBe(expectedDefaultQuantity);
+        actualListOfUser.Count.ShouldBe(expectedDefaultQuantity);
         _httpTest.ShouldHaveCalled(FakerApiUrl)
             .WithQueryParam("_quantity", expectedDefaultQuantity)
             .Times(1);
@@ -41,16 +41,16 @@ public class FakerRepositoryTests
     [InlineData(-1, 10)]
     [InlineData(0, 10)]
     [InlineData(1001, 1000)]
-    public async Task GetUsersAsync_With_Invalid_Quantity_Returns_Correct_Values(int requestedQuantity, int expectedQuantityReturned)
+    public async Task GetUsersAsync_When_Invalid_Quantity_Parameter_Supplied_Returns_Correct_Values(int requestedQuantity, int expectedQuantityReturned)
     {
         // Arrange
         _httpTest.RespondWithJson(GetMockUsersResponse(requestedQuantity));
 
         // Act
-        var result = await CreateSubjectUnderTest().GetUsersAsync(requestedQuantity);
+        var actualListOfUser = await CreateSubjectUnderTest().GetUsersAsync(requestedQuantity);
 
         // Assert
-        result.Count.ShouldBe(expectedQuantityReturned);
+        actualListOfUser.Count.ShouldBe(expectedQuantityReturned);
         _httpTest.ShouldHaveCalled(FakerApiUrl)
             .WithQueryParam("_quantity", requestedQuantity)
             .Times(1);
@@ -60,7 +60,7 @@ public class FakerRepositoryTests
     [InlineData(1)]
     [InlineData(10)]
     [InlineData(1000)]
-    public async Task GetUsersAsync_With_Parameters_Returns_That_Many_Users(int expectedQuantity)
+    public async Task GetUsersAsync_When_Valid_Parameters_Are_Supplied_Returns_That_Many_Users(int expectedQuantity)
     {
         // Arrange
         _httpTest.RespondWithJson(GetMockUsersResponse(expectedQuantity));
