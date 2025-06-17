@@ -1,5 +1,6 @@
 ﻿namespace Playground.Tests.Repositories;
 
+using System.Diagnostics.CodeAnalysis;
 using Flurl.Http.Testing;
 using Playground.Models;
 using Shouldly;
@@ -37,33 +38,29 @@ public class FakerRepositoryTests
             .Times(1);
     }
 
-    [Theory]
-    [InlineData(-1, 10)]
-    [InlineData(0, 10)]
-    [InlineData(1001, 1000)]
-    public async Task GetUsersAsync_When_Invalid_Quantity_Parameter_Is_Supplied_Returns_Corrected_Values(int requestedQuantity, int expectedQuantityReturned)
+    [Theory, MemberData(nameof(EdgeCaseUserResponseData))]
+    [SuppressMessage("Usage", "xUnit1045:Avoid using TheoryData type arguments that might not be serializable")]
+    public async Task GetUsersAsync_When_Invalid_Quantity_Parameter_Is_Supplied_Returns_Corrected_Values(Response<User> userResponse, int expectedQuantity)
     {
         // Arrange
-        _httpTest.RespondWithJson(GetMockUsersResponse(requestedQuantity));
+        _httpTest.RespondWithJson(userResponse);
 
         // Act
-        var actualListOfUser = await CreateSubjectUnderTest().GetUsersAsync(requestedQuantity);
+        var actualListOfUser = await CreateSubjectUnderTest().GetUsersAsync(expectedQuantity);
 
         // Assert
-        actualListOfUser.Count.ShouldBe(expectedQuantityReturned);
+        actualListOfUser.Count.ShouldBe(expectedQuantity);
         _httpTest.ShouldHaveCalled(FakerApiUrl)
-            .WithQueryParam("_quantity", requestedQuantity)
+            .WithQueryParam("_quantity", expectedQuantity)
             .Times(1);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(10)]
-    [InlineData(1000)]
-    public async Task GetUsersAsync_When_Valid_Quantity_Parameter_Is_Supplied_Returns_That_Many_Users(int expectedQuantity)
+    [Theory, MemberData(nameof(HappyUserResponseData))]
+    [SuppressMessage("Usage", "xUnit1045:Avoid using TheoryData type arguments that might not be serializable")]
+    public async Task GetUsersAsync_When_Valid_Quantity_Parameter_Is_Supplied_Returns_That_Many_Users(Response<User> userResponse, int expectedQuantity)
     {
         // Arrange
-        _httpTest.RespondWithJson(GetMockUsersResponse(expectedQuantity));
+        _httpTest.RespondWithJson(userResponse);
 
         // Act
         var result = await CreateSubjectUnderTest().GetUsersAsync(expectedQuantity);
@@ -77,8 +74,28 @@ public class FakerRepositoryTests
 
     #endregion
 
-    #region Private methods
+    #region Public properties
 
+    public static TheoryData<Response<User>, int> HappyUserResponseData =>
+        new()
+        {
+            { GetMockUsersResponse(1), 1 },
+            { GetMockUsersResponse(10), 10 },
+            { GetMockUsersResponse(1000), 1000 },
+        };
+    
+    public static TheoryData<Response<User>, int> EdgeCaseUserResponseData =>
+        new()
+        {
+            { GetMockUsersResponse(-1), 10 },
+            { GetMockUsersResponse(0), 10 },
+            { GetMockUsersResponse(1001), 1000 },
+        };
+
+    #endregion
+    
+    #region Private methods
+    
     private static FakerRepository CreateSubjectUnderTest() => new();
 
     private static List<User> GetMockUsers(int quantity = 10)
