@@ -15,7 +15,6 @@ public enum ValidAdditionalPropertyKeys
 public class Note
 {
     private const string OwnerRefKey = "OwnerRef";
-
     private const string OwnerTypeKey = "OwnerType";
     private const string OwnerWebSafeNoKey = "OwnerWebSafeNo";
     private const string ParentOwnerRef = "ParentOwnerRef";
