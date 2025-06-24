@@ -5,6 +5,19 @@ using Shouldly;
 
 public class NoteTests
 {
+    [Theory]
+    [InlineData(OwnerTypes.Claim)]
+    [InlineData(OwnerTypes.Claimant)]
+    public void Note_If_No_AdditionalProperty_Values_Are_Added_Then_AlternativeKeys_Is_Empty(OwnerTypes actualOwnerType)
+    {
+        // Arrange
+        // Act
+        var note = CreateSubjectUnderTest(actualOwnerType, string.Empty);
+
+        // Assert
+        note.AlternativeKeys.Count.ShouldBe(0);
+    }
+
     [Fact]
     public void Note_If_OwnerType_Is_Claim_Then_Correct_AlternativeKeys_Are_Returned()
     {
@@ -19,9 +32,9 @@ public class NoteTests
 
         // Assert
         note.AlternativeKeys.Count.ShouldBe(3);
-        note.AlternativeKeys["OwnerRef"].ShouldBe("AA123456");
-        note.AlternativeKeys["OwnerType"].ShouldBe("Claim");
-        note.AlternativeKeys["OwnerWebSafeNo"].ShouldBe("abcd-efgh-ijkl-mnop");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.OwnerRefKey, "AA123456");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.OwnerTypeKey, "Claim");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.OwnerWebSafeNoKey, "abcd-efgh-ijkl-mnop");
     }
 
     [Fact]
@@ -39,11 +52,11 @@ public class NoteTests
 
         // Assert
         note.AlternativeKeys.Count.ShouldBe(5);
-        note.AlternativeKeys["OwnerRef"].ShouldBe("ClaimantRef");
-        note.AlternativeKeys["OwnerType"].ShouldBe("Claimant");
-        note.AlternativeKeys["ParentOwnerWebSafeNo"].ShouldBe("abcd-efgh-ijkl-mnop");
-        note.AlternativeKeys["ParentOwnerRef"].ShouldBe("123456");
-        note.AlternativeKeys["ParentOwnerType"].ShouldBe("Claim");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.OwnerRefKey, "ClaimantRef");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.OwnerTypeKey, "Claimant");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.ParentOwnerWebSafeNoKey, "abcd-efgh-ijkl-mnop");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.ParentOwnerRefKey, "123456");
+        note.AlternativeKeys.ShouldContainKeyAndValue(Note.ParentOwnerTypeKey, "Claim");
     }
 
     [Fact]

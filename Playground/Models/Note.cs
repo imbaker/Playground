@@ -14,12 +14,12 @@ public enum ValidAdditionalPropertyKeys
 
 public class Note
 {
-    private const string OwnerRefKey = "OwnerRef";
-    private const string OwnerTypeKey = "OwnerType";
-    private const string OwnerWebSafeNoKey = "OwnerWebSafeNo";
-    private const string ParentOwnerRef = "ParentOwnerRef";
-    private const string ParentOwnerTypeKey = "ParentOwnerType";
-    private const string ParentOwnerWebSafeNo = "ParentOwnerWebSafeNo";
+    public const string OwnerRefKey = "OwnerRef";
+    public const string OwnerTypeKey = "OwnerType";
+    public const string OwnerWebSafeNoKey = "OwnerWebSafeNo";
+    public const string ParentOwnerRefKey = "ParentOwnerRef";
+    public const string ParentOwnerTypeKey = "ParentOwnerType";
+    public const string ParentOwnerWebSafeNoKey = "ParentOwnerWebSafeNo";
 
     public Note(OwnerTypes ownerType, string ownerRef)
     {
@@ -35,6 +35,11 @@ public class Note
         get
         {
             var alternativeKeys = new Dictionary<string, string>();
+            if (AdditionalProperties.Count == 0)
+            {
+                return alternativeKeys;
+            }
+
             alternativeKeys.Add(OwnerTypeKey, OwnerType.ToString());
             alternativeKeys.Add(OwnerRefKey, OwnerRef);
             switch (OwnerType)
@@ -44,8 +49,8 @@ public class Note
                     return alternativeKeys;
                 case OwnerTypes.Claimant:
                     alternativeKeys.Add(ParentOwnerTypeKey, nameof(OwnerTypes.Claim));
-                    alternativeKeys.Add(ParentOwnerRef, AdditionalProperties[ValidAdditionalPropertyKeys.ClaimRefNo]);
-                    alternativeKeys.Add(ParentOwnerWebSafeNo, AdditionalProperties[ValidAdditionalPropertyKeys.WebSafeClaimNo]);
+                    alternativeKeys.Add(ParentOwnerRefKey, AdditionalProperties[ValidAdditionalPropertyKeys.ClaimRefNo]);
+                    alternativeKeys.Add(ParentOwnerWebSafeNoKey, AdditionalProperties[ValidAdditionalPropertyKeys.WebSafeClaimNo]);
                     return alternativeKeys;
             }
 
