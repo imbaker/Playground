@@ -72,7 +72,7 @@ public class NoteTests
         var note = CreateSubjectUnderTest(OwnerTypes.Claim, string.Empty);
         note.AdditionalProperties.Add(actualKey, firstValue);
 
-        // Act & Arrange
+        // Act & Assert
         Should.Throw<ArgumentException>(() => { note.AdditionalProperties.Add(actualKey, secondValue); })
             .Message.ShouldBe(expectedMessage);
     }
